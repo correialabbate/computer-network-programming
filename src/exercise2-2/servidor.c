@@ -100,6 +100,8 @@ int main(int argc, char **argv)
             }
             printf("Message from client: \n\n%s\n\n", message);
 
+            ticks = time(NULL);
+            printf("Closed connection from %s:%d at %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
             close(connfd);
             exit(0);
         }
