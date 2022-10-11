@@ -23,7 +23,6 @@ int main(int argc, char **argv)
     socklen_t servaddr_len;
     char buf[MAXDATASIZE];
     char error[MAXLINE + 1];
-    char message[MAXDATASIZE];
     char commands[4][MAXDATASIZE] = {"ls -l", "ifconfig", "pwd", "EXIT"};
     time_t ticks;
     ssize_t len;
@@ -104,7 +103,7 @@ int main(int argc, char **argv)
                 read(connfd, buf, MAXLINE);
                 printf("BUF: %s\n", buf);
                 file_size = atoi(buf);
-                printf("File size: %s\n", file_size);
+                printf("File size: %d\n", file_size);
                 received_file = fopen(FILENAME, "w");
                 if (received_file == NULL)
                 {
@@ -119,7 +118,7 @@ int main(int argc, char **argv)
                 {
                         fwrite(buf, sizeof(char), len, received_file);
                         remain_data -= len;
-                        fprintf(stdout, "Receive %d bytes and we hope :- %d bytes\n", len, remain_data);
+                        fprintf(stdout, "Receive %zd bytes and we hope :- %d bytes\n", len, remain_data);
                 }
                 fclose(received_file);
             }
