@@ -54,3 +54,4 @@ dkms.conf
 # Compiled files
 servidor
 cliente
+output.txt

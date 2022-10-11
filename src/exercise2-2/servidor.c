@@ -65,7 +65,8 @@ int main(int argc, char **argv)
         perror("getsockname error");
         exit(1);
     }
-    printf("Running in %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
+
+    // printf("Running in %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
 
     for (;;)
     {
@@ -80,7 +81,9 @@ int main(int argc, char **argv)
             perror("getpeername error");
             exit(1);
         }
-        printf("Received connection from %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
+        
+        // ticks = time(NULL);
+        // printf("Received connection from %s:%d at %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
 
         // send
         // ticks = time(NULL);
@@ -110,10 +113,8 @@ int main(int argc, char **argv)
 
             fclose(received_file);
 
-            printf("Everything sent\n");
-
-            ticks = time(NULL);
-            printf("Closed connection from %s:%d at %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
+            // ticks = time(NULL);
+            // printf("Closed connection from %s:%d at %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
             close(connfd);
             exit(0);
         }
