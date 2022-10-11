@@ -82,9 +82,9 @@ int main(int argc, char **argv)
         }
         printf("Received connection from %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
 
-        // ticks = time(NULL);
-        // snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
-        // write(connfd, buf, strlen(buf));
+        ticks = time(NULL);
+        snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
+        write(connfd, buf, strlen(buf));
 
         // if(recv(connfd, message, sizeof(message), 0) < 0)
         // {
