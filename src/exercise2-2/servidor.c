@@ -13,10 +13,11 @@
 #define LISTENQ 10
 #define MAXDATASIZE 100
 #define MAXLINE 20000
+#define FILENAME        "/home/flabbate/test"
 
 int main(int argc, char **argv)
 {
-    int listenfd, connfd;
+    int listenfd, connfd, i, file_size, remain_data=0;
     pid_t pid;
     struct sockaddr_in servaddr;
     socklen_t servaddr_len;
@@ -25,6 +26,8 @@ int main(int argc, char **argv)
     char message[MAXDATASIZE];
     char commands[4][MAXDATASIZE] = {"ls -l", "ifconfig", "pwd", "EXIT"};
     time_t ticks;
+    ssize_t len;
+    FILE *received_file;
 
     if (argc != 2)
     {
@@ -74,32 +77,55 @@ int main(int argc, char **argv)
             exit(1);
         }
 
-        if (getpeername(connfd, (struct sockaddr *)&servaddr, &servaddr_len) < 0)
-        {
+        if (getpeername(connfd, (struct sockaddr*)&servaddr, &servaddr_len) < 0) {
             perror("getpeername error");
             exit(1);
         }
+        printf("Received connection from %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
 
-        ticks = time(NULL);
+        // ticks = time(NULL);
+        // snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
+        // write(connfd, buf, strlen(buf));
 
-        printf("Received connection from %s:%d at %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
+        // if(recv(connfd, message, sizeof(message), 0) < 0)
+        // {
+        //     perror("recv error");
+        //     exit(1);
+        // }
+        // printf("Message from client: %s\n", message);
 
-        if ((pid = fork()) == 0)
-        {
+        if ((pid = fork()) == 0){
             close(listenfd);
 
-            snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
-            write(connfd, buf, strlen(buf));
+            for (i=0; i<4; i++){
+                snprintf(buf, sizeof(commands[i]), "%s", commands[i]);
+                write(connfd, buf, strlen(buf));
+                bzero(buf, MAXDATASIZE);
+                read(connfd, buf, MAXLINE);
+                printf("BUF: %s\n", buf);
+                file_size = atoi(buf);
+                printf("File size: %s\n", file_size);
+                received_file = fopen(FILENAME, "w");
+                if (received_file == NULL)
+                {
+                        fprintf(stderr, "Failed to open file foo --> %s\n", strerror(errno));
 
-            write(connfd, commands[0], sizeof(commands[0]));
+                        exit(EXIT_FAILURE);
+                }
 
-            if (read(connfd, message, sizeof(message)) < 0)
-            {
-                perror("recv error");
-                exit(1);
+                remain_data = file_size;
+
+                while ((remain_data > 0) && ((len = recv(connfd, buf, BUFSIZ, 0)) > 0))
+                {
+                        fwrite(buf, sizeof(char), len, received_file);
+                        remain_data -= len;
+                        fprintf(stdout, "Receive %d bytes and we hope :- %d bytes\n", len, remain_data);
+                }
+                fclose(received_file);
             }
-            printf("Message from client: \n\n%s\n\n", message);
 
+            printf("Everything sent\n");
+            
             ticks = time(NULL);
             printf("Closed connection from %s:%d at %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
             close(connfd);
