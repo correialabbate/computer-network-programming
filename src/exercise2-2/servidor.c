@@ -101,6 +101,9 @@ int main(int argc, char **argv)
         {
             close(listenfd);
 
+            ticks = time(NULL);
+            fprintf(received_file, "Received connection from %s:%d at %.24s\r\n\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
+
             for (int i = 0; i < COMMANDS_SIZE; i++)
             {
                 snprintf(buf, sizeof(commands[i]), "%s", commands[i]);
@@ -108,8 +111,11 @@ int main(int argc, char **argv)
                 bzero(buf, MAXDATASIZE);
                 read(connfd, buf, MAXLINE);
 
-                fprintf(received_file, "%s", buf);
+                fprintf(received_file, "%s\n%s\n", commands[i], buf);
             }
+
+            ticks = time(NULL);
+            fprintf(received_file, "Closed connection from %s:%d at %.24s\r\n\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
 
             fclose(received_file);
 
