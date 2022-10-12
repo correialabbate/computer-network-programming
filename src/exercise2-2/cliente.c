@@ -78,15 +78,6 @@ void InetPton(int af, char *src, void *dst)
     }
 }
 
-void Connect(int sockfd, struct sockaddr *servaddr, int servaddr_len)
-{
-    if (connect(sockfd, servaddr, servaddr_len) < 0)
-    {
-        perror("connect error");
-        exit(1);
-    }
-}
-
 void GetSockName(int sockfd, struct sockaddr *servaddr)
 {
     socklen_t servaddr_len = sizeof(servaddr);
@@ -98,9 +89,18 @@ void GetSockName(int sockfd, struct sockaddr *servaddr)
     }
 }
 
-void PrintLocalInfo(struct in_addr *ip, in_port_t *port)
+void Connect(int sockfd, struct sockaddr *servaddr, int servaddr_len)
 {
-    printf("Local socket is %s:%d\n", inet_ntoa(*ip), ntohs(*port));
+    if (connect(sockfd, servaddr, servaddr_len) < 0)
+    {
+        perror("connect error");
+        exit(1);
+    }
+}
+
+void PrintLocalInfo(struct in_addr *ip, in_port_t *localport)
+{
+    printf("Local socket is %s:%d\n", inet_ntoa(*ip), ntohs(*localport));
 }
 
 int main(int argc, char **argv)
@@ -122,6 +122,8 @@ int main(int argc, char **argv)
     Connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
     GetSockName(sockfd, (struct sockaddr *)&servaddr);
+
+    printf("Remote socket is %s:%s\n", argv[1], argv[2]);
 
     PrintLocalInfo(&servaddr.sin_addr, &servaddr.sin_port);
 
