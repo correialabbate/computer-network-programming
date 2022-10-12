@@ -10,8 +10,39 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define MAXLINE 4096
+
+char *strrev(char *str)
+{
+    if (!str || ! *str)
+        return str;
+
+    int i = strlen(str) - 1, j = 0;
+
+    char ch;
+    while (i > j)
+    {
+        ch = str[i];
+        str[i] = str[j];
+        str[j] = ch;
+        i--;
+        j++;
+    }
+    return str;
+}
+
+char* strupr(char* s)
+{
+    char* tmp = s;
+
+    for (;*tmp;++tmp) {
+        *tmp = toupper((unsigned char) *tmp);
+    }
+
+    return s;
+}
 
 void CheckInput(int *argc, char ***argv)
 {
@@ -76,6 +107,7 @@ int main(int argc, char **argv)
 {
     int sockfd, n, file_size;
     char recvline[MAXLINE + 1];
+    char aux[MAXLINE + 1];
     struct sockaddr_in servaddr;
     char message[MAXLINE + 1];
 
@@ -102,6 +134,8 @@ int main(int argc, char **argv)
     // bzero(recvline, sizeof(recvline));
 
     n = read(sockfd, recvline, MAXLINE);
+    strcpy(aux, recvline);
+    printf("%s\n", strupr(strrev(aux)));
 
     while (strncmp(recvline, "EXIT", 4) != 0)
     {
@@ -132,6 +166,8 @@ int main(int argc, char **argv)
 
         bzero(recvline, MAXLINE + 1);
         n = read(sockfd, recvline, MAXLINE);
+        strcpy(aux, recvline);
+        printf("%s\n", strupr(strrev(aux)));
     }
 
     if (n < 0)
