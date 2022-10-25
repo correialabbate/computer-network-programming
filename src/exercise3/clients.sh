@@ -1,7 +1,7 @@
 #!/bin/bash
-# ./clients.sh port times
+# ./clients.sh times port
 
-for ((i=0; i < $2; ++i))
+for ((i=0; i < $1; ++i))
 do
-    ./cliente 127.0.0.1 $1
+    ./cliente 127.0.0.1 $2 &
 done

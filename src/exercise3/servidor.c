@@ -13,19 +13,16 @@
 #define LISTENQ 10
 #define MAXDATASIZE 100
 #define MAXLINE 20000
-#define COMMANDS_SIZE 4
 
 int main(int argc, char **argv)
 {
-    int listenfd, connfd;
     pid_t pid;
+    int listenfd, connfd;
     struct sockaddr_in servaddr;
     socklen_t servaddr_len;
     char buf[MAXDATASIZE];
     char error[MAXLINE + 1];
-    char commands[COMMANDS_SIZE][MAXDATASIZE] = {"ls -l", "ifconfig", "pwd", "EXIT"};
     time_t ticks;
-    FILE *received_file = fopen("output.txt", "w");
 
     if (argc != 2)
     {
@@ -60,16 +57,15 @@ int main(int argc, char **argv)
     }
 
     servaddr_len = sizeof(servaddr);
-    if (getsockname(listenfd, (struct sockaddr *)&servaddr, &servaddr_len) < 0)
-    {
+    if (getsockname(listenfd, (struct sockaddr*)&servaddr, &servaddr_len) < 0) {
         perror("getsockname error");
         exit(1);
     }
-
-    // printf("Running in %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
+    printf("Running in %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
 
     for (;;)
     {
+        sleep(60);
         if ((connfd = accept(listenfd, (struct sockaddr *)NULL, NULL)) == -1)
         {
             perror("accept");
@@ -82,45 +78,16 @@ int main(int argc, char **argv)
             exit(1);
         }
         
-        // ticks = time(NULL);
-        // printf("Received connection from %s:%d at %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
-
-        // send
-        // ticks = time(NULL);
-        // snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
-        // write(connfd, buf, strlen(buf));
-
-        // if(recv(connfd, message, sizeof(message), 0) < 0)
-        // {
-        //     perror("recv error");
-        //     exit(1);
-        // }
-        // printf("Message from client: %s\n", message);
-
         if ((pid = fork()) == 0)
         {
             close(listenfd);
 
-            ticks = time(NULL);
-            fprintf(received_file, "Received connection from %s:%d at %.24s\r\n\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
-
-            for (int i = 0; i < COMMANDS_SIZE; i++)
-            {
-                snprintf(buf, sizeof(commands[i]), "%s", commands[i]);
-                write(connfd, buf, strlen(buf));
-                bzero(buf, MAXDATASIZE);
-                read(connfd, buf, MAXLINE);
-
-                fprintf(received_file, "%s\n%s\n", commands[i], buf);
-            }
+            printf("Received connection from %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
 
             ticks = time(NULL);
-            fprintf(received_file, "Closed connection from %s:%d at %.24s\r\n\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
+            snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
+            write(connfd, buf, strlen(buf));
 
-            fclose(received_file);
-
-            // ticks = time(NULL);
-            // printf("Closed connection from %s:%d at %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
             close(connfd);
             exit(0);
         }

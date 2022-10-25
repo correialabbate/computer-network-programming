@@ -14,36 +14,6 @@
 
 #define MAXLINE 4096
 
-char *strrev(char *str)
-{
-    if (!str || ! *str)
-        return str;
-
-    int i = strlen(str) - 1, j = 0;
-
-    char ch;
-    while (i > j)
-    {
-        ch = str[i];
-        str[i] = str[j];
-        str[j] = ch;
-        i--;
-        j++;
-    }
-    return str;
-}
-
-char* strupr(char* s)
-{
-    char* tmp = s;
-
-    for (;*tmp;++tmp) {
-        *tmp = toupper((unsigned char) *tmp);
-    }
-
-    return s;
-}
-
 void CheckInput(int *argc, char ***argv)
 {
     char error[MAXLINE + 1];
@@ -105,11 +75,9 @@ void PrintLocalInfo(struct in_addr *ip, in_port_t *localport)
 
 int main(int argc, char **argv)
 {
-    int sockfd, n, file_size;
+    int sockfd, n;
     char recvline[MAXLINE + 1];
-    char aux[MAXLINE + 1];
     struct sockaddr_in servaddr;
-    char message[MAXLINE + 1];
 
     CheckInput(&argc, &argv);
     sockfd = CreateSocket();
@@ -127,55 +95,19 @@ int main(int argc, char **argv)
 
     PrintLocalInfo(&servaddr.sin_addr, &servaddr.sin_port);
 
-    // get hello
-    // if (fputs(recvline, stdout) == EOF)
-    // {
-    //     perror("fputs error");
-    //     exit(1);
-    // }
-    // bzero(recvline, sizeof(recvline));
-
-    n = read(sockfd, recvline, MAXLINE);
-    strcpy(aux, recvline);
-    printf("%s\n", strupr(strrev(aux)));
-
-    while (strncmp(recvline, "EXIT", 4) != 0)
-    {
-        FILE *fp;
-        char path[1035];
-        char file_content[10000] = "";
-
-        fp = popen(recvline, "r");
-        if (fp == NULL)
-        {
-            printf("Failed to run command\n");
+    while ((n = read(sockfd, recvline, MAXLINE)) > 0) {
+        recvline[n] = 0;
+        if (fputs(recvline, stdout) == EOF) {
+            perror("fputs error");
             exit(1);
         }
-
-        file_size = 0;
-        while (fgets(path, sizeof(path), fp) != NULL)
-        {
-            strcat(file_content, path);
-        }
-
-        file_size = strlen(file_content) + 1;
-
-        send(sockfd, file_content, file_size, 0);
-
-        pclose(fp);
-
-        write(sockfd, message, strlen(message));
-
-        bzero(recvline, MAXLINE + 1);
-        n = read(sockfd, recvline, MAXLINE);
-        strcpy(aux, recvline);
-        printf("%s\n", strupr(strrev(aux)));
     }
 
-    if (n < 0)
-    {
+    if (n < 0) {
         close(sockfd);
     }
+
+    exit(0);
 
     exit(0);
 }
