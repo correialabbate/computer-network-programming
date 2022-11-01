@@ -1,0 +1,113 @@
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <netdb.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
+
+#define MAXLINE 4096
+
+void CheckInput(int *argc, char ***argv)
+{
+    char error[MAXLINE + 1];
+
+    if (*argc != 3)
+    {
+        strcpy(error, "uso: ");
+        strcat(error, *argv[0]);
+        strcat(error, " <IPaddress> <Port>");
+        perror(error);
+        exit(1);
+    }
+}
+
+int CreateSocket()
+{
+    int sockfd;
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        perror("socket error");
+        exit(1);
+    }
+    return sockfd;
+}
+
+void InetPton(int af, char *src, void *dst)
+{
+    if (inet_pton(af, src, dst) <= 0)
+    {
+        perror("inet_pton error");
+        exit(1);
+    }
+}
+
+void GetSockName(int sockfd, struct sockaddr *servaddr)
+{
+    socklen_t servaddr_len = sizeof(servaddr);
+
+    if (getsockname(sockfd, servaddr, &servaddr_len) < 0)
+    {
+        perror("getsockname error");
+        exit(1);
+    }
+}
+
+void Connect(int sockfd, struct sockaddr *servaddr, int servaddr_len)
+{
+    if (connect(sockfd, servaddr, servaddr_len) < 0)
+    {
+        perror("connect error");
+        exit(1);
+    }
+}
+
+void PrintLocalInfo(struct in_addr *ip, in_port_t *localport)
+{
+    printf("Local socket is %s:%d\n", inet_ntoa(*ip), ntohs(*localport));
+}
+
+int main(int argc, char **argv)
+{
+    int sockfd, n;
+    char recvline[MAXLINE + 1];
+    struct sockaddr_in servaddr;
+
+    CheckInput(&argc, &argv);
+    sockfd = CreateSocket();
+
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(atoi(argv[2]));
+
+    InetPton(AF_INET, argv[1], &servaddr.sin_addr);
+    Connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+
+    GetSockName(sockfd, (struct sockaddr *)&servaddr);
+
+    printf("Remote socket is %s:%s\n", argv[1], argv[2]);
+
+    PrintLocalInfo(&servaddr.sin_addr, &servaddr.sin_port);
+
+    while ((n = read(sockfd, recvline, MAXLINE)) > 0) {
+        recvline[n] = 0;
+        if (fputs(recvline, stdout) == EOF) {
+            perror("fputs error");
+            exit(1);
+        }
+    }
+
+    if (n < 0) {
+        close(sockfd);
+    }
+
+    exit(0);
+
+    exit(0);
+}
