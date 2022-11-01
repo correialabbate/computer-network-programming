@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define LISTENQ 10
+#define LISTENQ 5
 #define MAXDATASIZE 100
 #define MAXLINE 20000
 
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
     for (;;)
     {
-        sleep(60);
+        sleep(5);
         if ((connfd = accept(listenfd, (struct sockaddr *)NULL, NULL)) == -1)
         {
             perror("accept");
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
             close(connfd);
             exit(0);
         }
-
+        waitpid(pid, 0, 0);
         close(connfd);
     }
 
