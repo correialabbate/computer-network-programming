@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#define MAXLINE 4096
+#define MAXLINE 40960
 
 void CheckInput(int *argc, char ***argv)
 {
@@ -77,6 +77,8 @@ int main(int argc, char **argv)
 {
     int sockfd, n;
     char recvline[MAXLINE + 1];
+    char message[MAXLINE + 1] = {};
+    char output[MAXLINE + 1];
     struct sockaddr_in servaddr;
 
     CheckInput(&argc, &argv);
@@ -95,12 +97,18 @@ int main(int argc, char **argv)
 
     PrintLocalInfo(&servaddr.sin_addr, &servaddr.sin_port);
 
-    while ((n = read(sockfd, recvline, MAXLINE)) > 0) {
+     while ((n = read(sockfd, recvline, MAXLINE)) > 0) {
         recvline[n] = 0;
         if (fputs(recvline, stdout) == EOF) {
             perror("fputs error");
             exit(1);
         }
+
+        while (fgets(message, sizeof(message), stdin)) {
+            strcat(output, message);
+        }
+
+        send(sockfd, output, sizeof(output), 0);
     }
 
     if (n < 0) {

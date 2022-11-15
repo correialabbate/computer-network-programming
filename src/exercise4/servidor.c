@@ -21,6 +21,7 @@ int main(int argc, char **argv)
     struct sockaddr_in servaddr;
     socklen_t servaddr_len;
     char buf[MAXDATASIZE];
+    char message[MAXLINE];
     char error[MAXLINE + 1];
     time_t ticks;
 
@@ -57,7 +58,8 @@ int main(int argc, char **argv)
     }
 
     servaddr_len = sizeof(servaddr);
-    if (getsockname(listenfd, (struct sockaddr*)&servaddr, &servaddr_len) < 0) {
+    if (getsockname(listenfd, (struct sockaddr *)&servaddr, &servaddr_len) < 0)
+    {
         perror("getsockname error");
         exit(1);
     }
@@ -77,7 +79,7 @@ int main(int argc, char **argv)
             perror("getpeername error");
             exit(1);
         }
-        
+
         if ((pid = fork()) == 0)
         {
             close(listenfd);
@@ -87,6 +89,13 @@ int main(int argc, char **argv)
             ticks = time(NULL);
             snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
             write(connfd, buf, strlen(buf));
+
+            if (recv(connfd, message, sizeof(message), 0) < 0)
+            {
+                perror("recv error");
+                exit(1);
+            }
+            printf("Message from client:\n%s\n", message);
 
             close(connfd);
             exit(0);

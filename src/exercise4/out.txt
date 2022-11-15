@@ -1,0 +1,4 @@
+Remote socket is 127.0.0.1:1024
+Local socket is 127.0.0.1:56704
+Hello from server!
+Time: Mon Nov 14 23:35:20 2022
