@@ -18,11 +18,11 @@ void CheckInput(int *argc, char ***argv)
 {
     char error[MAXLINE + 1];
 
-    if (*argc != 3)
+    if (*argc != 4)
     {
         strcpy(error, "uso: ");
         strcat(error, *argv[0]);
-        strcat(error, " <IPaddress> <Port>");
+        strcat(error, " <IPaddress> <Port1> <Port2>");
         perror(error);
         exit(1);
     }
@@ -108,6 +108,7 @@ int main(int argc, char **argv)
     }
 
     if (n < 0) {
+        shutdown(sockfd, SHUT_WR);
         close(sockfd);
     }
 
