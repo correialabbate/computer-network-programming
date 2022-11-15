@@ -1,4 +1,10 @@
-Remote socket is 127.0.0.1:1024
-Local socket is 127.0.0.1:56704
-Hello from server!
-Time: Mon Nov 14 23:35:20 2022
+Hello from server to client in:
+IP address: 127.0.0.1
+Port: 56910
+Time: Mon Nov 14 23:55:30 2022
+-------------------------------
+Teste entrada stdin do cliente
+MC833
+Turma 2s 2022
+Exercicio 5
+-------------------------------

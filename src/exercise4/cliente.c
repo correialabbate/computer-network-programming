@@ -93,10 +93,6 @@ int main(int argc, char **argv)
 
     GetSockName(sockfd, (struct sockaddr *)&servaddr);
 
-    printf("Remote socket is %s:%s\n", argv[1], argv[2]);
-
-    PrintLocalInfo(&servaddr.sin_addr, &servaddr.sin_port);
-
      while ((n = read(sockfd, recvline, MAXLINE)) > 0) {
         recvline[n] = 0;
         if (fputs(recvline, stdout) == EOF) {

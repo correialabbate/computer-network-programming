@@ -87,7 +87,7 @@ int main(int argc, char **argv)
             printf("Received connection from %s:%d\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port));
 
             ticks = time(NULL);
-            snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
+            snprintf(buf, sizeof(buf), "Hello from server to client in:\nIP address: %s\nPort: %d\nTime: %.24s\r\n", inet_ntoa(servaddr.sin_addr), ntohs(servaddr.sin_port), ctime(&ticks));
             write(connfd, buf, strlen(buf));
 
             if (recv(connfd, message, sizeof(message), 0) < 0)
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
                 perror("recv error");
                 exit(1);
             }
-            printf("Message from client:\n%s\n", message);
+            write(connfd, message, strlen(message));
 
             close(connfd);
             exit(0);
