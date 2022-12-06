@@ -14,6 +14,27 @@
 
 #define MAXLINE 40960
 
+int powInt(int x, int y)
+{
+    for (int i = 0; i < y; i++)
+    {
+        x *= 10;
+    }
+    return x;
+}
+
+int parseInt(char *chars)
+{
+    int sum = 0;
+    int len = strlen(chars);
+    for (int x = 0; x < len; x++)
+    {
+        int n = chars[len - (x + 1)] - '0';
+        sum = sum + powInt(n, x);
+    }
+    return sum;
+}
+
 void CheckInput(int *argc, char ***argv)
 {
     char error[MAXLINE + 1];
@@ -105,12 +126,7 @@ int main(int argc, char **argv)
         send(sockfd, message, sizeof(message), 0);
         bzero(recvline, sizeof(recvline));
         read(sockfd, recvline, MAXLINE);
-        if (fputs(recvline, stdout) == EOF)
-        {
-            perror("fputs error");
-            exit(1);
-        }
-        bzero(recvline, sizeof(recvline));
+        printf("Connect with %s:%d\n", inet_ntoa(servaddr.sin_addr), parseInt(recvline));
     }
 
     if (n < 0)
