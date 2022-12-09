@@ -1,4 +1,3 @@
-// Server side implementation of UDP client-server model
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,16 +10,13 @@
 #define PORT 8080
 #define MAXLINE 1024
 
-// Driver code
 int main()
 {
 	int sockfd;
 	char buffer[MAXLINE];
 	char message[MAXLINE];
-	char *hello = "Hello from server";
 	struct sockaddr_in servaddr, cliaddr;
 
-	// Creating socket file descriptor
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 		perror("socket creation failed");
@@ -30,12 +26,10 @@ int main()
 	memset(&servaddr, 0, sizeof(servaddr));
 	memset(&cliaddr, 0, sizeof(cliaddr));
 
-	// Filling server information
-	servaddr.sin_family = AF_INET; // IPv4
+	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = INADDR_ANY;
 	servaddr.sin_port = htons(PORT);
 
-	// Bind the socket with the server address
 	if (bind(sockfd, (const struct sockaddr *)&servaddr,
 			 sizeof(servaddr)) < 0)
 	{
@@ -43,12 +37,12 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	int len, n;
+	socklen_t len, n;
 
-	len = sizeof(cliaddr); // len is value/result
+	len = sizeof(cliaddr);
 
 	printf("Waiting for message...");
-	while (strcmp(buffer, "finalizar_chat") != 0)
+	while (strcmp(buffer, "Tchau") != 0)
 	{
 		n = recvfrom(sockfd, (char *)buffer, MAXLINE,
 					 MSG_WAITALL, (struct sockaddr *)&servaddr,
@@ -57,7 +51,7 @@ int main()
 		printf("Server: %s\n", buffer);
 
 		printf("Type message to send: ");
-		scanf("%s", &message);
+		scanf("%s", message);
 		sendto(sockfd, (const char *)message, strlen(message),
 			   0, (const struct sockaddr *)&servaddr,
 			   sizeof(servaddr));

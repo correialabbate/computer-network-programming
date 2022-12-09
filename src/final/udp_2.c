@@ -1,4 +1,3 @@
-// Client side implementation of UDP client-server model
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,16 +10,13 @@
 #define PORT 8080
 #define MAXLINE 1024
 
-// Driver code
 int main()
 {
 	int sockfd;
 	char buffer[MAXLINE];
 	char message[MAXLINE];
-	char *hello = "Hello from client";
 	struct sockaddr_in servaddr;
 
-	// Creating socket file descriptor
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 		perror("socket creation failed");
@@ -29,17 +25,16 @@ int main()
 
 	memset(&servaddr, 0, sizeof(servaddr));
 
-	// Filling server information
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(PORT);
 	servaddr.sin_addr.s_addr = INADDR_ANY;
 
-	int n, len;
+	socklen_t n, len;
 
-	while (strcmp(buffer, "finalizar_chat") != 0)
+	while (strcmp(buffer, "Tchau") != 0)
 	{
 		printf("Type message to send: ");
-		scanf("%s", &message);
+		scanf("%s", message);
 		sendto(sockfd, (const char *)message, strlen(message),
 			   0, (const struct sockaddr *)&servaddr,
 			   sizeof(servaddr));
